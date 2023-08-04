@@ -8,6 +8,8 @@ class FileUpload extends FieldsContract
 {
     public string $renderClass = \Filament\Forms\Components\FileUpload::class;
 
+    public bool $disabled = true;
+
     public int $sort = 11;
 
     public function title(): string
