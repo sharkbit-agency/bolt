@@ -18,8 +18,9 @@ class Toggle extends FieldsContract
     public static function getOptions(): array
     {
         return [
-            self::required(),
             self::htmlID(),
+            self::required(),
+            self::columnSpanFull(),
             self::visibility(),
         ];
     }

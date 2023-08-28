@@ -1,9 +1,11 @@
 <?php
 
-namespace LaraZeus\Bolt\Http\Livewire;
+namespace LaraZeus\Bolt\Livewire;
 
 use Filament\Forms;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\View\View;
+use LaraZeus\Bolt\BoltPlugin;
 use LaraZeus\Bolt\Events\FormMounted;
 use LaraZeus\Bolt\Events\FormSent;
 use LaraZeus\Bolt\Facades\Bolt;
@@ -20,9 +22,13 @@ class FillForms extends Component implements Forms\Contracts\HasForms
 
     public Form $zeusForm;
 
-    public $extensionData;
+    public array $extensionData;
 
-    public $zeusData = [];
+    public array $zeusData = [];
+
+    public bool $sent = false;
+
+    public bool $inline = false;
 
     protected function getFormSchema(): array
     {
@@ -37,9 +43,11 @@ class FillForms extends Component implements Forms\Contracts\HasForms
     /**
      * @throws \Throwable
      */
-    public function mount($slug, $extensionSlug = null)
+    public function mount(string $slug, string $extensionSlug = null, bool $inline = false): void
     {
-        $this->zeusForm = config('zeus-bolt.models.Form')::query()
+        $this->inline = $inline;
+
+        $this->zeusForm = BoltPlugin::getModel('Form')::query()
             ->with([
                 'sections', 'sections.fields',
             ])
@@ -58,16 +66,11 @@ class FillForms extends Component implements Forms\Contracts\HasForms
         event(new FormMounted($this->zeusForm));
     }
 
-    public function resetAll()
-    {
-        $this->reset();
-    }
-
-    public function store()
+    public function store(): void
     {
         $this->validate();
 
-        $response = config('zeus-bolt.models.Response')::create([
+        $response = BoltPlugin::getModel('Response')::create([
             'form_id' => $this->zeusForm->id,
             'user_id' => (auth()->check()) ? auth()->user()->id : null,
             'status' => 'NEW',
@@ -80,8 +83,7 @@ class FillForms extends Component implements Forms\Contracts\HasForms
             if (! empty($setValue) && is_array($setValue)) {
                 $value = json_encode($value);
             }
-
-            config('zeus-bolt.models.FieldResponse')::create([
+            BoltPlugin::getModel('FieldResponse')::create([
                 'response' => (! empty($value)) ? $value : '',
                 'response_id' => $response->id,
                 'form_id' => $this->zeusForm->id,
@@ -95,6 +97,7 @@ class FillForms extends Component implements Forms\Contracts\HasForms
         $this->extensionData['extensionsComponent'] = $this->form->getState()['extensions'] ?? [];
 
         $extensionItemId = Extensions::init($this->zeusForm, 'store', $this->extensionData) ?? [];
+        $this->extensionData['extInfo'] = $extensionItemId;
 
         $response->update(['extension_item_id' => $extensionItemId['itemId'] ?? null]);
 
@@ -102,41 +105,38 @@ class FillForms extends Component implements Forms\Contracts\HasForms
             $emails = explode(',', $this->zeusForm->options['emails-notification']);
 
             foreach ($emails as $email) {
-                $mailable = config('zeus-bolt.default_mailable');
+                $mailable = BoltPlugin::get()->getDefaultMailable();
                 Mail::to($email)->send(new $mailable($this->zeusForm, $response));
             }
         }
 
-        return redirect()->route('bolt.submitted', ['slug' => $this->zeusForm->slug, $extensionItemId['itemId'] ?? 0]);
+        $this->sent = true;
     }
 
-    public function render()
+    public function render(): View
     {
-        seo()
-            ->title($this->zeusForm->name . ' ' . config('zeus-bolt.site_title', 'Laravel'))
-            ->description($this->zeusForm->description . ' ' . config('zeus-bolt.site_description', 'Laravel'))
-            ->site(config('zeus-bolt.site_title', 'Laravel'))
-            ->rawTag('favicon', '<link rel="icon" type="image/x-icon" href="' . asset('favicon/favicon.ico') . '">')
-            ->rawTag('<meta name="theme-color" content="' . config('zeus-bolt.site_color') . '" />')
-            ->withUrl()
-            ->twitter();
-
-        if ($this->zeusForm->need_login) {
-            return view('zeus-bolt::errors.login-required')
-                ->layout(config('zeus-bolt.layout'));
+        if (! $this->inline) {
+            seo()
+                ->title($this->zeusForm->name . ' - ' . __('Forms') . ' - ' . config('zeus.site_title', 'Laravel'))
+                ->description($this->zeusForm->description . ' - ' . config('zeus.site_description') . ' ' . config('zeus.site_title'))
+                ->site(config('zeus.site_title', 'Laravel'))
+                ->rawTag('favicon', '<link rel="icon" type="image/x-icon" href="' . asset('favicon/favicon.ico') . '">')
+                ->rawTag('<meta name="theme-color" content="' . config('zeus.site_color') . '" />')
+                ->withUrl()
+                ->twitter();
         }
 
-        if (! $this->zeusForm->date_available) {
-            return view('zeus-bolt::errors.date-not-available')
-                ->layout(config('zeus-bolt.layout'));
+        $view = match (true) {
+            $this->zeusForm->need_login => 'zeus::errors.login-required',
+            ! $this->zeusForm->date_available => 'zeus::errors.date-not-available',
+            $this->zeusForm->onePerUser() => 'zeus::errors.one-entry-per-user',
+            default => app('boltTheme') . '.fill-forms',
+        };
+
+        if ($this->inline) {
+            return view($view);
         }
 
-        if ($this->zeusForm->onePerUser()) {
-            return view('zeus-bolt::errors.one-entry-per-user')
-                ->layout(config('zeus-bolt.layout'));
-        }
-
-        return view(app('bolt-theme') . '.fill-forms')
-            ->layout(config('zeus-bolt.layout'));
+        return view($view)->layout(config('zeus.layout'));
     }
 }

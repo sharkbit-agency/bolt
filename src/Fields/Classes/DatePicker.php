@@ -8,7 +8,7 @@ class DatePicker extends FieldsContract
 {
     public string $renderClass = \Filament\Forms\Components\DatePicker::class;
 
-    public int $sort = 8;
+    public int $sort = 6;
 
     public function title(): string
     {
@@ -18,8 +18,9 @@ class DatePicker extends FieldsContract
     public static function getOptions(): array
     {
         return [
-            self::required(),
             self::htmlID(),
+            self::required(),
+            self::columnSpanFull(),
             self::visibility(),
         ];
     }

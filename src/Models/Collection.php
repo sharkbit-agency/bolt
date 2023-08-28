@@ -2,7 +2,6 @@
 
 namespace LaraZeus\Bolt\Models;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,25 +25,23 @@ class Collection extends Model
         'values' => 'collection',
     ];
 
-    public function getValuesListAttribute(): string
+    public function getValuesListAttribute(): ?string
     {
-        $someValues = '';
-        $someValuesCount = 0;
-        if ($this->values !== null) {
-            $allValues = collect($this->values);
-            $someValuesCount = $allValues->count();
-            $someValues = $allValues->take(5)
-                ->map(function ($item) {
-                    return $item['itemValue'] = '<span class="tager text-xs text-gray-700 font-semibold px-1.5 py-0.5 rounded-md">' . $item['itemValue'] . '</span>';
-                })
-                ->join(' ');
-        }
-        $more = ($someValuesCount > 5) ? '...' : '';
+        $allValues = collect($this->values);
 
-        return $someValues . $more;
+        if ($allValues->isNotEmpty()) {
+            return $allValues
+                ->take(5)
+                ->map(function ($item) {
+                    return $item['itemValue'];
+                })
+                ->join(',');
+        }
+
+        return null;
     }
 
-    protected static function newFactory(): Factory
+    protected static function newFactory(): CollectionFactory
     {
         return CollectionFactory::new();
     }

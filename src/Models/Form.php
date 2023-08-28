@@ -3,13 +3,13 @@
 namespace LaraZeus\Bolt\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use LaraZeus\Bolt\BoltPlugin;
 use LaraZeus\Bolt\Concerns\HasActive;
 use LaraZeus\Bolt\Concerns\HasUpdates;
 use LaraZeus\Bolt\Database\Factories\FormFactory;
@@ -87,7 +87,7 @@ class Form extends Model
         return 'slug';
     }
 
-    protected static function newFactory(): Factory
+    protected static function newFactory(): FormFactory
     {
         return FormFactory::new();
     }
@@ -100,31 +100,31 @@ class Form extends Model
     /** @phpstan-return BelongsTo<Form, Category> */
     public function category(): BelongsTo
     {
-        return $this->belongsTo(config('zeus-bolt.models.Category'));
+        return $this->belongsTo(BoltPlugin::getModel('Category'));
     }
 
     /** @phpstan-return hasMany<Section> */
     public function sections(): HasMany
     {
-        return $this->hasMany(config('zeus-bolt.models.Section'));
+        return $this->hasMany(BoltPlugin::getModel('Section'));
     }
 
     /** @phpstan-return hasManyThrough<Field> */
     public function fields(): HasManyThrough
     {
-        return $this->hasManyThrough(config('zeus-bolt.models.Field'), config('zeus-bolt.models.Section'));
+        return $this->hasManyThrough(BoltPlugin::getModel('Field'), BoltPlugin::getModel('Section'));
     }
 
     /** @phpstan-return hasMany<Response> */
     public function responses(): hasMany
     {
-        return $this->hasMany(config('zeus-bolt.models.Response'));
+        return $this->hasMany(BoltPlugin::getModel('Response'));
     }
 
     /** @phpstan-return hasMany<FieldResponse> */
     public function fieldsResponses(): HasMany
     {
-        return $this->hasMany(config('zeus-bolt.models.FieldResponse'));
+        return $this->hasMany(BoltPlugin::getModel('FieldResponse'));
     }
 
     /**
@@ -160,6 +160,6 @@ class Form extends Model
     {
         return optional($this->options)['require-login']
             && optional($this->options)['one-entry-per-user']
-            && $this->responses()->where('user_id')->exists();
+            && $this->responses()->where('user_id', auth()->user()->id)->exists();
     }
 }

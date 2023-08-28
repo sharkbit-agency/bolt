@@ -2,17 +2,12 @@
 
 namespace LaraZeus\Bolt\Facades;
 
-use Illuminate\Support\Facades\Facade;
 use LaraZeus\Bolt\Contracts\Extension;
+use LaraZeus\Bolt\Models\Form;
 
-class Extensions extends Facade
+class Extensions
 {
-    protected static function getFacadeAccessor(): string
-    {
-        return 'bolt';
-    }
-
-    public static function init($form, $hook, $data = null, $action = 'create'): null|Extension|array|string
+    public static function init(Form $form, string $hook, array $data = null, string $action = 'create'): null | Extension | array | string
     {
         if ($form->extensions !== null) {
             if (class_exists($form->extensions)) {

@@ -2,12 +2,12 @@
 
 namespace LaraZeus\Bolt\Models;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use LaraZeus\Bolt\BoltPlugin;
 use LaraZeus\Bolt\Database\Factories\SectionFactory;
 use Spatie\Translatable\HasTranslations;
 
@@ -49,7 +49,7 @@ class Section extends Model
         });
     }
 
-    protected static function newFactory(): Factory
+    protected static function newFactory(): SectionFactory
     {
         return SectionFactory::new();
     }
@@ -57,12 +57,12 @@ class Section extends Model
     /** @phpstan-return hasMany<Field> */
     public function fields(): HasMany
     {
-        return $this->hasMany(config('zeus-bolt.models.Field'), 'section_id', 'id');
+        return $this->hasMany(BoltPlugin::getModel('Field'), 'section_id', 'id');
     }
 
     /** @return BelongsTo<Form, Section> */
     public function form(): BelongsTo
     {
-        return $this->belongsTo(config('zeus-bolt.models.Form'));
+        return $this->belongsTo(BoltPlugin::getModel('Form'));
     }
 }

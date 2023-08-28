@@ -4,6 +4,8 @@ namespace LaraZeus\Bolt\Fields\Classes;
 
 use Filament\Forms\Components\Toggle;
 use LaraZeus\Bolt\Fields\FieldsContract;
+use LaraZeus\Bolt\Models\Field;
+use LaraZeus\Bolt\Models\FieldResponse;
 
 class Radio extends FieldsContract
 {
@@ -20,26 +22,27 @@ class Radio extends FieldsContract
     {
         return [
             self::dataSource(),
+            self::htmlID(),
             Toggle::make('options.is_inline')->label(__('Is inline')),
             self::required(),
-            self::htmlID(),
+            self::columnSpanFull(),
             self::visibility(),
         ];
     }
 
-    public function getResponse($field, $resp): string
+    public function getResponse(Field $field, FieldResponse $resp): string
     {
         return $this->getCollectionsValuesForResponse($field, $resp);
     }
 
+    // @phpstan-ignore-next-line
     public function appendFilamentComponentsOptions($component, $zeusField)
     {
         parent::appendFilamentComponentsOptions($component, $zeusField);
 
         $options = FieldsContract::getFieldCollectionItemsList($zeusField);
 
-        $component = $component
-            ->options($options->pluck('itemValue', 'itemKey'));
+        $component = $component->options($options);
 
         if (isset($zeusField->options['is_inline']) && $zeusField->options['is_inline']) {
             $component->inline();
@@ -47,6 +50,7 @@ class Radio extends FieldsContract
 
         if (request()->filled($zeusField->options['htmlId'])) {
             $component = $component->default(request($zeusField->options['htmlId']));
+            //todo set default items for datasources
         } elseif ($selected = $options->where('itemIsDefault', true)->pluck('itemKey')->isNotEmpty()) {
             $component = $component->default($selected);
         }

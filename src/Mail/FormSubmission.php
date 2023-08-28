@@ -2,26 +2,29 @@
 
 namespace LaraZeus\Bolt\Mail;
 
+use Filament\Facades\Filament;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use LaraZeus\Bolt\Models\Form;
+use LaraZeus\Bolt\Models\Response;
 
 class FormSubmission extends Mailable implements ShouldQueue
 {
     use Queueable;
     use SerializesModels;
 
-    public $form;
+    public Form $form;
 
-    public $response;
+    public Response $response;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($form, $response)
+    public function __construct(Form $form, Response $response)
     {
         $this->form = $form;
         $this->response = $response;
@@ -43,9 +46,9 @@ class FormSubmission extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            markdown: 'zeus-bolt::emails.form-submission',
+            markdown: 'zeus::emails.form-submission',
             with: [
-                'url' => url(config('filament.path') . '/responses/' . $this->response->id),
+                'url' => url(Filament::getDefaultPanel()->getPath() . '/responses/' . $this->response->id),
             ],
         );
     }

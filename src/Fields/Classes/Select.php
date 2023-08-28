@@ -4,6 +4,8 @@ namespace LaraZeus\Bolt\Fields\Classes;
 
 use Filament\Forms\Components\Toggle;
 use LaraZeus\Bolt\Fields\FieldsContract;
+use LaraZeus\Bolt\Models\Field;
+use LaraZeus\Bolt\Models\FieldResponse;
 
 class Select extends FieldsContract
 {
@@ -20,18 +22,20 @@ class Select extends FieldsContract
     {
         return [
             self::dataSource(),
-            self::required(),
-            Toggle::make('options.allow_multiple')->label(__('Allow Multiple')),
             self::htmlID(),
+            Toggle::make('options.allow_multiple')->label(__('Allow Multiple')),
+            self::required(),
+            self::columnSpanFull(),
             self::visibility(),
         ];
     }
 
-    public function getResponse($field, $resp): string
+    public function getResponse(Field $field, FieldResponse $resp): string
     {
         return $this->getCollectionsValuesForResponse($field, $resp);
     }
 
+    // @phpstan-ignore-next-line
     public function appendFilamentComponentsOptions($component, $zeusField)
     {
         parent::appendFilamentComponentsOptions($component, $zeusField);
@@ -40,7 +44,8 @@ class Select extends FieldsContract
 
         $component = $component
             ->searchable()
-            ->options($options->pluck('itemValue', 'itemKey'));
+            ->preload()
+            ->options($options);
 
         if (isset($zeusField->options['allow_multiple']) && $zeusField->options['allow_multiple']) {
             $component = $component->multiple();
@@ -48,6 +53,7 @@ class Select extends FieldsContract
 
         if (request()->filled($zeusField->options['htmlId'])) {
             $component = $component->default(request($zeusField->options['htmlId']));
+            //todo set default items for datasources
         } elseif ($selected = $options->where('itemIsDefault', true)->pluck('itemKey')->isNotEmpty()) {
             $component = $component->default($selected);
         }

@@ -127,7 +127,7 @@
   "Set Status": "Set Status",
   "Browse Entries": "Browse Entries",
   "Form Dates": "Form Dates",
-  "Date type": "Date type",
+  "Data type": "Data type",
   "text": "text",
   "email": "email",
   "numeric": "numeric",
@@ -169,5 +169,10 @@
   "any changes in the values of these items will affect the responses for the forms in": "any changes in the values of these items will affect the responses for the forms in",
   "field": "field",
   "End date": "End date",
-  "Extension": "Extension"
+  "Extension": "Extension",
+  "min length": "min length",
+  "max length" :"max length",
+  "fields per row" :"fields per row",
+  "Full Width" :"Full Width",
+  "show this field in full width row" :"show this field in full width row"
 }

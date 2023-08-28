@@ -3,7 +3,7 @@
 namespace LaraZeus\Bolt\Tests\Models;
 
 use Filament\Models\Contracts\FilamentUser;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use LaraZeus\Bolt\Database\Factories\UserFactory;
@@ -23,12 +23,12 @@ class User extends Authenticatable implements FilamentUser
 
     protected $table = 'users';
 
-    public function canAccessFilament(): bool
+    public function canAccessPanel(Panel $panel): bool
     {
         return true;
     }
 
-    protected static function newFactory(): Factory
+    protected static function newFactory(): UserFactory
     {
         return UserFactory::new();
     }

@@ -8,7 +8,7 @@ class RichEditor extends FieldsContract
 {
     public string $renderClass = \Filament\Forms\Components\RichEditor::class;
 
-    public int $sort = 10;
+    public int $sort = 7;
 
     public function title(): string
     {
@@ -18,8 +18,9 @@ class RichEditor extends FieldsContract
     public static function getOptions(): array
     {
         return [
-            self::required(),
             self::htmlID(),
+            self::required(),
+            self::columnSpanFull(),
             self::visibility(),
         ];
     }
