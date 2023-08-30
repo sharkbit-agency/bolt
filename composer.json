@@ -27,11 +27,17 @@
             "role": "Owner"
         }
     ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/sharkbit-agency/filament-icon-picker.git"
+        }
+    ],
     "require": {
         "php": "^8.1",
         "codeat3/blade-clarity-icons": "^1.7",
         "lara-zeus/core": "^3.0",
-        "guava/filament-icon-picker": "^2.0.1",
+        "guava/filament-icon-picker": "dev-dev",
         "alperenersoy/filament-export": "v3.0.0-beta"
     },
     "require-dev": {
