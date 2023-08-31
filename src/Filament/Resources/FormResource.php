@@ -74,7 +74,7 @@ class FormResource extends BoltResource
                 Section::make()->schema([
                     TextEntry::make('name'),
                     TextEntry::make('slug')
-                        ->url(fn (ZeusForm $record) => route('bolt.form.show', ['slug' => $record->slug]))
+                        ->url(fn (ZeusForm $record) => route('forms.show', ['slug' => $record->slug]))
                         ->openUrlInNewTab(),
                     TextEntry::make('description'),
                     IconEntry::make('is_active')
@@ -129,7 +129,7 @@ class FormResource extends BoltResource
                         ->label(__('Open Form'))
                         ->icon('heroicon-o-arrow-top-right-on-square')
                         ->tooltip(__('open form'))
-                        ->url(fn (ZeusForm $record): string => route('bolt.form.show', $record))
+                        ->url(fn (ZeusForm $record): string => route('forms.show', $record->slug))
                         ->openUrlInNewTab(),
                     ReplicateAction::make()
                         ->label(__('Replicate'))
