@@ -27,18 +27,12 @@
             "role": "Owner"
         }
     ],
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/lara-zeus/filament-export"
-        }
-    ],
     "require": {
         "php": "^8.1",
         "codeat3/blade-clarity-icons": "^1.7",
         "lara-zeus/core": "^3.0",
         "guava/filament-icon-picker": "dev-main",
-        "alperenersoy/filament-export": "dev-fix-there"
+        "alperenersoy/filament-export": "v3.0.1-beta"
     },
     "require-dev": {
         "laravel/pint": "^1.0",
